@@ -2,10 +2,28 @@
 {% block content %}
 
             <!-- Quick Statistics -->
-            <div class="flex flex-row mb-8" hx-trigger="load" hx-get="/partial/averages" hx-swap="innerHTML">
+            <div class="relative py-4">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-b border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-white px-4 text-2xl text-black">Last Values</span>
+                </div>
             </div>
             <div class="flex flex-row mb-8" hx-trigger="load, every 10s" hx-get="/partial/last" hx-swap="innerHTML">
             </div>
+            <div class="relative py-4">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-b border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-white px-4 text-2xl text-black">Averages</span>
+                </div>
+            </div>
+
+            <div class="flex flex-row mb-8" hx-trigger="load" hx-get="/partial/averages" hx-swap="innerHTML">
+            </div>
+
 
             <!-- Main Content -->
             <div class="bg-white p-8 rounded shadow">
