@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block custom_js %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready( function () {
+        $('#data').DataTable();
+    } );
+</script>
+{% endblock %}
+{% block content %}
+      <div class="bg-white p-8 rounded shadow">
+                <!-- Sample DataTable -->
+                <table id="data" class="display">
+                    <thead>
+                        <tr>
+                            <th>Created at</th>
+                            <th>Device ID</th>
+                            <th>Temperature</th>
+                            <th>Lights</th>
+                            <th>Soil Humidity</th>
+                            <th>Air Humidity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            <td>{{row['created_at']}}</td>
+                            <td>{{row['device_id']}}</td>
+                            <td>{{row['temperature']}}</td>
+                            <td>{{row['light']}}</td>
+                            <td>{{row['soil_humidity']}}</td>
+                            <td>{{row['air_humidity']}}</td>
+                        </tr>
+                        {% endfor %}
+                        <!-- Add more rows as needed -->
+                    </tbody>
+                </table>
+            </div>
+{% endblock %}
