@@ -72,6 +72,7 @@ def on_message(client, userdata, msg):
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
+client.publish("hackeps/eurecat", b'{"humidity": "all"}')
 client.username_pw_set("grupo_2", "grupo_2")
 client.connect("84.88.76.18", 1883, 60)
 

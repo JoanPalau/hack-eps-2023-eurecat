@@ -1,8 +1,9 @@
 from flask import request, render_template
 
 from app import app, db
-from app.models import Data
+from app.models import Data, Configuration
 from app.utils import is_positive
+from app.mqtt import publish_data
 
 
 @app.route('/')
@@ -83,11 +84,9 @@ def averages():
 @app.route('/partial/daily_averages', methods=['GET'])
 def daily_averages():
     temperature = round(
-            db.session.query(db.func.avg(Data.temperature)).filter(
-                Data.created_at >= db.func.current_date()).scalar(), 2)
+            db.session.query(db.func.avg(Data.temperature)).scalar(), 2)
     light = round(
-            db.session.query(db.func.avg(Data.light)).filter(
-                Data.created_at >= db.func.current_date()).scalar(), 2)
+            db.session.query(db.func.avg(Data.light)).scalar(), 2)
     soil_humidity = round(
         db.session.query(db.func.avg(Data.soil_humidity)).filter(
             Data.created_at >= db.func.current_date()).scalar(), 2)
@@ -108,17 +107,13 @@ def last():
     previous = Data.query.order_by(Data.id.desc()).offset(1).first()
     last = Data.query.order_by(Data.id.desc()).first()
     temperature = round(
-            db.session.query(db.func.avg(Data.temperature)).filter(
-                Data.created_at >= db.func.current_date()).scalar(), 2)
+            db.session.query(db.func.avg(Data.temperature)).scalar(), 2)
     light = round(
-            db.session.query(db.func.avg(Data.light)).filter(
-                Data.created_at >= db.func.current_date()).scalar(), 2)
+            db.session.query(db.func.avg(Data.light)).scalar(), 2)
     soil_humidity = round(
-        db.session.query(db.func.avg(Data.soil_humidity)).filter(
-            Data.created_at >= db.func.current_date()).scalar(), 2)
+        db.session.query(db.func.avg(Data.soil_humidity)).scalar(), 2)
     air_humidity = round(
-        db.session.query(db.func.avg(Data.air_humidity)).filter(
-            Data.created_at >= db.func.current_date()).scalar(), 2)
+        db.session.query(db.func.avg(Data.air_humidity)).scalar(), 2)
     averages = {
             "temperature": temperature,
             "light": light,
@@ -143,5 +138,25 @@ def devices_select():
 
 @app.route('/partial/pump', methods=['GET'])
 def pump():
+    publish_data({"pump": True})
     return render_template('partials/notification.html',
                            message='Pump correctly activated')
+
+
+@app.route('/partial/humidity-toggle', methods=['GET'])
+def humidity_toggle():
+    configuration = Configuration.query.filter_by(key="humidity").first()
+    return render_template('partials/humidity-switch.html',
+                           humidity=configuration)
+
+
+@app.route('/partial/humidity/<setting>', methods=['GET'])
+def humidity_switch(setting):
+    configuration = Configuration.query.filter_by(key="humidity").first()
+    if setting not in ['all', 'air', 'soil']:
+        setting = 'all'
+    configuration.value = setting
+    db.session.commit()
+    publish_data({"humidity": setting})
+    return render_template('partials/humidity-switch.html',
+                           humidity=configuration)

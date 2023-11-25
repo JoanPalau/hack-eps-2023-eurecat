@@ -49,6 +49,12 @@
                 class="col-span-1 bg-blue-500 text-white p-2 rounded">PUMP IT!</button>
         </div>
 
+        <div class="bg-gray-200/20 p-4 mb-4 mt-4 text-cyan-500">
+            You can change the humidity sensor configuration by selecting the 
+            one which will be recorded, from air to soil to all.
+        </div>
+        <div class="grid grid-cols-3" hx-get="/partial/humidity-toggle" hx-trigger="load" id="humidity-toggle">
+        </div>
     </div>
 
     <div class="relative py-4">
