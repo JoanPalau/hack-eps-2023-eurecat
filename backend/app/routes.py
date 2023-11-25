@@ -21,8 +21,8 @@ def tables():
 def save_data():
     data = request.json
     db.session.add(Data(
-        device_id=data.get('device_id') if is_positive(
-            data.get('device_id')) else None,
+        device_id=data.get('id') if is_positive(
+            data.get('id')) else None,
         temperature=data.get('temperature') if is_positive(
             data.get('temperature')) else None,
         light=data.get('light') if is_positive(
