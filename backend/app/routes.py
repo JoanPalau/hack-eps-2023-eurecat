@@ -32,7 +32,10 @@ def save_data():
         air_humidity=data.get('air_humidity') if is_positive(
             data.get('air_humidity')) else None,
         ))
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        return str(e)
     return 'Data saved'
 
 
