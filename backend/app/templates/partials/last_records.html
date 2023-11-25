@@ -1,0 +1,22 @@
+    <table class="table-fixed w-full border-separate border-spacing-y-3">
+        <thead>
+            <tr>
+                <th class="w-20 z-10 font-bold left-0 bg-emerald-900/50 rounded-md px-8 py-2">Device ID</th>
+                <th class="w-20 z-10 font-bold top-0 bg-emerald-700/70 md:w-24 left-0 rounded-md px-4 py-2">Temperature</th>
+                <th class="w-20 z-10 font-bold top-0 bg-emerald-700/70">Light</th>
+                <th class="w-20 z-10 font-bold top-0 bg-emerald-700/70">Soil Humidity</th>
+                <th class="w-20 z-10 font-bold top-0 bg-emerald-700/70">Air Humidity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in last%}
+            <tr>
+                <td class="text-center font-semibold">{{record.device_id}}</td>
+                <td class="text-center">{{record.temperature}}</td>
+                <td class="text-center">{{record.light}}</td>
+                <td class="text-center">{{record.soil_humidity}}<span class="text-sm text-gray-500/70">/100</span></td>
+                <td class="text-center">{{record.air_humidity}}<span class="text-sm text-gray-500/70">/100</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>

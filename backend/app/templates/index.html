@@ -43,6 +43,6 @@
             </div>
 
             <!-- Main Content -->
-            <div class="bg-white p-8 rounded shadow">
+            <div class="bg-white p-8 rounded shadow" hx-trigger="load, every 10s" hx-get="/partial/last_records" hx-swap="innerHTML">
             </div>
             {% endblock %}

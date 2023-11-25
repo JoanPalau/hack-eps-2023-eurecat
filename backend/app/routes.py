@@ -127,3 +127,9 @@ def last():
             }
     return render_template('partials/last.html', last=last,
                            previous=previous, averages=averages)
+
+
+@app.route('/partial/last_records', methods=['GET'])
+def last_records():
+    last_records = Data.query.order_by(Data.id.desc()).limit(10).all()
+    return render_template('partials/last_records.html', last=last_records)
