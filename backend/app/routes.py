@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta
-from flask import request, render_template, jsonify
+from flask import request, render_template
 
 from app import app, db
 from app.models import Data
+from app.utils import is_positive
 
 
 @app.route('/')
@@ -21,14 +21,41 @@ def tables():
 def save_data():
     data = request.json
     db.session.add(Data(
-        device_id=data['device_id'],
-        temperature=data['temperature'],
-        light=data['light'],
-        soil_humidity=data['soil_humidity'],
-        air_humidity=data['air_humidity'],
+        device_id=data.get('device_id') if is_positive(
+            data.get('device_id')) else None,
+        temperature=data.get('temperature') if is_positive(
+            data.get('temperature')) else None,
+        light=data.get('light') if is_positive(
+            data.get('light')) else None,
+        soil_humidity=data.get('soil_humidity') if is_positive(
+            data.get('soil_humidity')) else None,
+        air_humidity=data.get('air_humidity') if is_positive(
+            data.get('air_humidity')) else None,
         ))
     db.session.commit()
     return 'Data saved'
+
+
+@app.route('/graph')
+def graph():
+    return render_template('graph.html')
+
+
+@app.route('/graph/<stat>')
+def graph_stat(stat):
+    devices = Data.query.with_entities(Data.device_id).distinct()
+    labels = [d[0] for d in devices]
+    payload = {"labels": labels, "datasets": []}
+    for device in devices:
+        data = Data.query.filter_by(device_id=device[0]).all()
+        if data:
+            values = [getattr(d, stat) for d in data]
+            payload["datasets"].append({
+                "name": device[0],
+                "label": device[0],
+                "data": values,
+                })
+    return payload
 
 
 # Partial routes for htmx
