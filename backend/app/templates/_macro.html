@@ -5,3 +5,10 @@
         <i class="fa-solid fa-arrow-down text-red-500"></i>
     {% endif %}
 {% endmacro %}
+{% macro color(last, previous) %}
+    {% if last > previous %}
+        text-green-500
+    {% elif last < previous %}
+        text-red-500
+    {% endif %}
+{% endmacro %}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eurecat Plants Dashboard</title>
+    <title>Eurecat Plants - {% block title %}{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org/dist/htmx.js"></script>
@@ -39,11 +39,11 @@
     <div class="flex flex-1">
 
         <!-- Sidebar -->
-        <aside class="bg-gray-800 text-white w-2/12 p-4">
+        <aside class="bg-gray-800 text-white w-2/12 p-4 text-center">
             <ul>
-                <li class="mb-4"><a href="{{url_for('index')}}" class="text-lg hover:text-blue-300">Dashboard</a></li>
-                <li class="mb-4"><a href="{{url_for('tables')}}" class="text-lg hover:text-blue-300">Data Table</a></li>
-                <li class="mb-4"><a href="{{url_for('graph')}}" class="text-lg hover:text-blue-300">Graphs</a></li>
+                <li id="Dashboard" class="mb-4 bg-gray-800 p-4 hover:bg-blue-500/50 rounded-lg"><a href="{{url_for('index')}}" class="text-lg hover:text-blue-300">Dashboard</a></li>
+                <li id="Data Table" class="mb-4 bg-gray-800 p-4 hover:bg-blue-500/50 rounded-lg"><a href="{{url_for('tables')}}" class="text-lg hover:text-blue-300">Data Table</a></li>
+                <li id="Graphs" class="mb-4 bg-gray-800 p-4 hover:bg-blue-500/50 rounded-lg"><a href="{{url_for('graph')}}" class="text-lg hover:text-blue-300">Graphs</a></li>
             </ul>
         </aside>
 
@@ -59,6 +59,11 @@
         <p class="text-center">&copy; 2023 Vibrani</p>
     </footer>
 
+    <script>
+        var classlist = document.getElementById(document.title.split('-')[1].trim()).classList;
+        classlist.remove('bg-gray-800');
+        classlist.add('bg-emerald-500/50');
+    </script>
+
 </body>
 </html>
-

@@ -21,8 +21,7 @@ def tables():
 def save_data():
     data = request.json
     db.session.add(Data(
-        device_id=data.get('id') if is_positive(
-            data.get('id')) else None,
+        device_id=data.get('id'),
         temperature=data.get('temperature') if is_positive(
             data.get('temperature')) else None,
         light=data.get('light') if is_positive(
@@ -108,4 +107,23 @@ def daily_averages():
 def last():
     previous = Data.query.order_by(Data.id.desc()).offset(1).first()
     last = Data.query.order_by(Data.id.desc()).first()
-    return render_template('partials/last.html', last=last, previous=previous)
+    temperature = round(
+            db.session.query(db.func.avg(Data.temperature)).filter(
+                Data.created_at >= db.func.current_date()).scalar(), 2)
+    light = round(
+            db.session.query(db.func.avg(Data.light)).filter(
+                Data.created_at >= db.func.current_date()).scalar(), 2)
+    soil_humidity = round(
+        db.session.query(db.func.avg(Data.soil_humidity)).filter(
+            Data.created_at >= db.func.current_date()).scalar(), 2)
+    air_humidity = round(
+        db.session.query(db.func.avg(Data.air_humidity)).filter(
+            Data.created_at >= db.func.current_date()).scalar(), 2)
+    averages = {
+            "temperature": temperature,
+            "light": light,
+            "soil_humidity": soil_humidity,
+            "air_humidity": air_humidity,
+            }
+    return render_template('partials/last.html', last=last,
+                           previous=previous, averages=averages)
