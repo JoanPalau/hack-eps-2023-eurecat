@@ -1,32 +1,97 @@
 {% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block custom_js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 {% block content %}
+    <div class="bg-emerald-200/40 p-4 mb-4 text-black">
+        The data will be automatically updated in... <span id="countdown"></span>
+    </div>
 
-            <!-- Quick Statistics -->
-            <div class="relative py-4">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-b border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center">
-                    <span class="bg-white px-4 text-2xl text-black">Last Values</span>
-                </div>
-            </div>
-            <div class="flex flex-row mb-8" hx-trigger="load, every 10s" hx-get="/partial/last" hx-swap="innerHTML">
-            </div>
-            <div class="relative py-4">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-b border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center">
-                    <span class="bg-white px-4 text-2xl text-black">Averages</span>
-                </div>
-            </div>
+    <!-- Quick Statistics -->
+    <div class="relative py-4">
+        <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-b border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center">
+            <span class="bg-white px-4 text-2xl text-black">Last Values</span>
+        </div>
+    </div>
 
-            <div class="flex flex-row mb-8" hx-trigger="load" hx-get="/partial/averages" hx-swap="innerHTML">
-            </div>
+    <div class="flex flex-row mb-8" hx-trigger="load, every 10s" hx-get="/partial/last" hx-swap="innerHTML">
+    </div>
+
+    <div class="relative py-4">
+        <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-b border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center">
+            <span class="bg-white px-4 text-2xl text-black">Actions</span>
+        </div>
+    </div>
+
+    <div class="bg-white p-8 rounded shadow">
+        <div class="bg-gray-200/20 p-4 mb-4 text-cyan-500">
+            You can manually trigger the water pump by selecting a device
+            and then by clicking on the button below.
+        </div>
+        <div class="grid grid-cols-4 gap-4">
+            <!-- Select -->
+            <select class="col-span-3 p-2 border border-gray-300 rounded" hx-get="/partial/devices_select" hx-trigger="load" hx-swap="innerHTML">
+            </select>
+
+            <!-- Button -->
+            <button 
+                hx-get="/partial/pump"
+                hx-trigger="click"
+                hx-swap="innerHTML"
+                hx-target="#notification"
+                class="col-span-1 bg-blue-500 text-white p-2 rounded">PUMP IT!</button>
+        </div>
+
+        <div class="bg-gray-200/20 p-4 mb-4 mt-4 text-cyan-500">
+            You can change the humidity sensor configuration by selecting the 
+            one which will be recorded, from air to soil to all.
+        </div>
+        <div class="grid grid-cols-3" hx-get="/partial/humidity-toggle" hx-trigger="load" id="humidity-toggle">
+        </div>
+    </div>
+
+    <div class="relative py-4">
+        <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-b border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center">
+            <span class="bg-white px-4 text-2xl text-black">Last Records</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="bg-white p-8 rounded shadow" hx-trigger="load, every 10s" hx-get="/partial/last_records" hx-swap="innerHTML">
+    </div>
+    <div id="notification" hx-ext="remove-me">
+    </div>
 
 
-            <!-- Main Content -->
-            <div class="bg-white p-8 rounded shadow">
-                content lorem ipsum
-            </div>
+
+    <script>
+        let counter = 10;
+        function updateCountdown() {
+            document.getElementById('countdown').innerText = counter;
+        }
+
+        function resetCountdown() {
+            counter = 10;
+            updateCountdown();
+        }
+
+        setInterval(function () {
+            counter--;
+            updateCountdown();
+
+            if (counter === 0) {
+                resetCountdown();
+            }
+        }, 1000);
+    </script>
 {% endblock %}

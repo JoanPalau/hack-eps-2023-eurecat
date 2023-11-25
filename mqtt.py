@@ -60,18 +60,20 @@ def save_to_db(data):
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
 
-    client.subscribe("hackeps/eurecat")
+    # client.subscribe("hackeps/eurecat")
+    client.subscribe("hackeps/G2")
 
 
 def on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
-    save_to_db(msg.payload)
+    # save_to_db(msg.payload)
     # more callbacks, etc
 
 
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
+client.publish("hackeps/eurecat", b'{"humidity": "all"}')
 client.username_pw_set("grupo_2", "grupo_2")
 client.connect("84.88.76.18", 1883, 60)
 

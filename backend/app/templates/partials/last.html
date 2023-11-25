@@ -1,23 +1,50 @@
 {% from "./_macro.html" import icon %}
-<!-- Statistic Card 1 -->
-<div class="w-1/4 p-4 bg-white rounded shadow text-center">
-    <h3 class="text-lg font-semibold mb-2">Temperature</h3>
-    <p class="text-gray-700 text-xl">{{last.temperature}} {{ icon(last.temperature, previous.temperature) }} </p>
+<div class="w-1/4 p-4 bg-white rounded shadow mx-4 text-center flex items-center justify-between">
+    <!-- Left side (icon) -->
+    <div class="flex items-center">
+        <!-- Replace "light-icon" with your actual icon class or image -->
+        <div class="mr-2">
+            <i class="fas fa-temperature-three-quarters text-xs text-red-700/50 sm:text-3xl md:text-6xl"></i>
+        </div>
+    </div>
+
+    <!-- Right side (value) -->
+    <p class="text-gray-700 text-xl"><span class="font-bold">{{last.temperature}} {{ icon(last.temperature, previous.temperature) }}</span> (AVG - {{ averages['temperature'] }})</p>
 </div>
 
-<!-- Statistic Card 2 -->
-<div class="w-1/4 p-4 bg-white rounded shadow mx-4 text-center">
-    <h3 class="text-lg font-semibold mb-2">Light</h3>
-    <p class="text-gray-700 text-xl">{{last.light}} {{ icon(last.light, previous.light) }}</p>
-</div>
+<div class="w-1/4 p-4 bg-white rounded shadow mx-4 text-center flex items-center justify-between">
+    <!-- Left side (icon) -->
+    <div class="flex items-center">
+        <!-- Replace "light-icon" with your actual icon class or image -->
+        <div class="mr-2">
+            <i class="fas fa-sun text-xs text-yellow-200 sm:text-3xl md:text-6xl"></i>
+        </div>
+    </div>
 
-<!-- Statistic Card 3 -->
-<div class="w-1/4 p-4 bg-white rounded shadow mx-4 text-center">
-    <h3 class="text-lg font-semibold mb-2">Soil Humidity</h3>
-    <p class="text-gray-700 text-xl">{{last.soil_humidity}} {{ icon(last.soil_humidity, previous.soil_humidity) }}</p>
+    <!-- Right side (value) -->
+    <p class="text-gray-700 text-xl"><span class="font-bold">{{last.light}} {{ icon(last.light, previous.light) }}</span> (AVG - {{ averages['light'] }})</p>
 </div>
+<div class="w-1/4 p-4 bg-white rounded shadow mx-4 text-center flex items-center justify-between">
+    <!-- Left side (icon) -->
+    <div class="flex items-center">
+        <!-- Replace "light-icon" with your actual icon class or image -->
+        <div class="mr-2">
+            <i class="fas fa-water text-xs text-amber-700 sm:text-3xl md:text-6xl"></i>
+        </div>
+    </div>
 
-<div class="w-1/4 p-4 bg-white rounded shadow text-center">
-    <h3 class="text-lg font-semibold mb-2">Air Humidity</h3>
-    <p class="text-gray-700 text-xl">{{last.air_humidity}} {{ icon(last.air_humidity, previous.air_humidity) }}</p>
+    <!-- Right side (value) -->
+    <p class="text-gray-700 text-xl"><span class="font-bold">{{last.soil_humidity}} {{ icon(last.soil_humidity, previous.soil_humidity) }}</span> (AVG - {{ averages['soil_humidity'] }})</p>
+</div>
+<div class="w-1/4 p-4 bg-white rounded shadow mx-4 text-center flex items-center justify-between">
+    <!-- Left side (icon) -->
+    <div class="flex items-center">
+        <!-- Replace "light-icon" with your actual icon class or image -->
+        <div class="mr-2">
+            <i class="fas fa-wind text-xs text-cyan-200/40 sm:text-3xl md:text-6xl"></i>
+        </div>
+    </div>
+
+    <!-- Right side (value) -->
+    <p class="text-gray-700 text-xl"><span class="font-bold">{{last.air_humidity}} {{ icon(last.air_humidity, previous.air_humidity) }}</span> (AVG - {{ averages['air_humidity'] }})</p>
 </div>

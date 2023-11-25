@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Graphs{% endblock %}
+{% block custom_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% endblock %}
+{% block content %}
+    <div class="grid grid-cols-2 grid-rows-2 gap-4 h-screen">
+        <!-- First Graph -->
+        <div class="bg-gray-200 p-4">
+    <canvas id="temperatureChart"></canvas>
+        </div>
+
+        <!-- Second Graph -->
+        <div class="bg-gray-200 p-4">
+            <canvas id="lightChart"></canvas>
+        </div>
+
+        <!-- Third Graph -->
+        <div class="bg-gray-200 p-4">
+            <canvas id="air_humidityChart"></canvas>
+        </div>
+
+        <!-- Fourth Graph -->
+        <div class="bg-gray-200 p-4">
+            <canvas id="soil_humidityChart"></canvas>
+        </div>
+  </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetchDataAndDrawChart('temperature');
+        fetchDataAndDrawChart('light');
+        fetchDataAndDrawChart('air_humidity');
+        fetchDataAndDrawChart('soil_humidity');
+    });
+    async function fetchDataAndDrawChart(field) {
+        const ctx = document.getElementById(field + 'Chart');
+        const response = await fetch(`/graph/${field}`);
+        const data = await response.json();
+
+        new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

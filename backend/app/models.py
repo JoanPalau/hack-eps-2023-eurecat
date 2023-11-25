@@ -10,3 +10,8 @@ class Data(db.Model):
     soil_humidity = db.Column(db.Float, nullable=False)
     air_humidity = db.Column(db.Float, nullable=False)
     extra_data = db.Column(db.JSON)
+
+
+class Configuration(db.Model):
+    key = db.Column(db.String, primary_key=True)
+    value = db.Column(db.String, nullable=False)
