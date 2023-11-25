@@ -60,12 +60,13 @@ def save_to_db(data):
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
 
-    client.subscribe("hackeps/eurecat")
+    # client.subscribe("hackeps/eurecat")
+    client.subscribe("hackeps/G2")
 
 
 def on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
-    save_to_db(msg.payload)
+    # save_to_db(msg.payload)
     # more callbacks, etc
 
 

@@ -157,6 +157,6 @@ def humidity_switch(setting):
         setting = 'all'
     configuration.value = setting
     db.session.commit()
-    publish_data({"humidity": setting})
+    publish_data({"dhtmode": setting})
     return render_template('partials/humidity-switch.html',
                            humidity=configuration)
