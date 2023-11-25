@@ -133,3 +133,15 @@ def last():
 def last_records():
     last_records = Data.query.order_by(Data.id.desc()).limit(10).all()
     return render_template('partials/last_records.html', last=last_records)
+
+
+@app.route('/partial/devices_select', methods=['GET'])
+def devices_select():
+    devices = Data.query.with_entities(Data.device_id).distinct()
+    return render_template('partials/devices_select.html', devices=devices)
+
+
+@app.route('/partial/pump', methods=['GET'])
+def pump():
+    return render_template('partials/notification.html',
+                           message='Pump correctly activated')

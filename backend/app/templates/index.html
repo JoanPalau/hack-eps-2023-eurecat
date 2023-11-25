@@ -28,6 +28,24 @@
             </div>
 
             <div class="bg-white p-8 rounded shadow">
+                <div class="bg-gray-200/20 p-4 mb-4 text-cyan-500">
+                    You can manually trigger the water pump by selecting a device
+                    and then by clicking on the button below.
+                </div>
+                <div class="grid grid-cols-4 gap-4">
+                    <!-- Select -->
+                    <select class="col-span-3 p-2 border border-gray-300 rounded" hx-get="/partial/devices_select" hx-trigger="load" hx-swap="innerHTML">
+                    </select>
+
+                    <!-- Button -->
+                    <button 
+                        hx-get="/partial/pump"
+                        hx-trigger="click"
+                        hx-swap="innerHTML"
+                        hx-target="#notification"
+                        class="col-span-1 bg-blue-500 text-white p-2 rounded">PUMP IT!</button>
+                </div>
+
             </div>
 
             <div class="relative py-4">
@@ -44,5 +62,7 @@
 
             <!-- Main Content -->
             <div class="bg-white p-8 rounded shadow" hx-trigger="load, every 10s" hx-get="/partial/last_records" hx-swap="innerHTML">
+            </div>
+            <div id="notification" hx-ext="remove-me">
             </div>
             {% endblock %}
