@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+
+            <!-- Quick Statistics -->
+            <div class="flex flex-row mb-8" hx-trigger="load" hx-get="/partial/averages" hx-swap="innerHTML">
+            </div>
+            <div class="flex flex-row mb-8" hx-trigger="load, every 10s" hx-get="/partial/last" hx-swap="innerHTML">
+            </div>
+
+            <!-- Main Content -->
+            <div class="bg-white p-8 rounded shadow">
+                content lorem ipsum
+            </div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% macro icon(last, previous) %}
+    {% if last > previous %}
+        <i class="fa-solid fa-arrow-up text-green-500"></i>
+    {% elif last < previous %}
+        <i class="fa-solid fa-arrow-down text-red-500"></i>
+    {% endif %}
+{% endmacro %}
