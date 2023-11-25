@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% block custom_js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 {% block content %}
 
             <!-- Quick Statistics -->
@@ -11,6 +14,18 @@
                 </div>
             </div>
             <div class="flex flex-row mb-8" hx-trigger="load, every 10s" hx-get="/partial/last" hx-swap="innerHTML">
+            </div>
+
+            <div class="relative py-4">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-b border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-white px-4 text-2xl text-black">Daily Averages</span>
+                </div>
+            </div>
+
+            <div class="flex flex-row mb-8" hx-trigger="load" hx-get="/partial/daily_averages" hx-swap="innerHTML">
             </div>
             <div class="relative py-4">
                 <div class="absolute inset-0 flex items-center">
@@ -27,6 +42,6 @@
 
             <!-- Main Content -->
             <div class="bg-white p-8 rounded shadow">
-                content lorem ipsum
+
             </div>
-{% endblock %}
+            {% endblock %}

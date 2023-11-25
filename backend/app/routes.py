@@ -1,4 +1,5 @@
-from flask import request, render_template
+from datetime import datetime, timedelta
+from flask import request, render_template, jsonify
 
 from app import app, db
 from app.models import Data
@@ -41,6 +42,29 @@ def averages():
         db.session.query(db.func.avg(Data.soil_humidity)).scalar(), 2)
     air_humidity = round(
         db.session.query(db.func.avg(Data.air_humidity)).scalar(), 2)
+    averages = {
+            "temperature": temperature,
+            "light": light,
+            "soil_humidity": soil_humidity,
+            "air_humidity": air_humidity,
+            }
+    return render_template('partials/averages.html', averages=averages)
+
+
+@app.route('/partial/daily_averages', methods=['GET'])
+def daily_averages():
+    temperature = round(
+            db.session.query(db.func.avg(Data.temperature)).filter(
+                Data.created_at >= db.func.current_date()).scalar(), 2)
+    light = round(
+            db.session.query(db.func.avg(Data.light)).filter(
+                Data.created_at >= db.func.current_date()).scalar(), 2)
+    soil_humidity = round(
+        db.session.query(db.func.avg(Data.soil_humidity)).filter(
+            Data.created_at >= db.func.current_date()).scalar(), 2)
+    air_humidity = round(
+        db.session.query(db.func.avg(Data.air_humidity)).filter(
+            Data.created_at >= db.func.current_date()).scalar(), 2)
     averages = {
             "temperature": temperature,
             "light": light,
