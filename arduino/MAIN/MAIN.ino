@@ -4,15 +4,15 @@
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 
-#include <DHT.h>
+// #include <DHT.h>
 
 #define WIFI_MSG_BUFFER_SIZE (50)
 #define SERIAL_BAUD_RATE 9600
 #define NO_DATA_INPUT_INT -1
 
-#define DHTPIN D4     // Digital pin connected to the DHT sensor
-#define DHTTYPE DHT11 // DHT 11
-DHT dht(DHTPIN, DHTTYPE);
+// #define DHTPIN D4     // Digital pin connected to the DHT sensor
+// #define DHTTYPE DHT11 // DHT 11
+// DHT dht(DHTPIN, DHTTYPE);
 
 /*
  * This should not be hardcoded here, but it's a hackathon so...
@@ -51,7 +51,7 @@ struct farmDataStruct {
 struct farmActionsStruct {
   String dhtmode;
   bool pump;
-}
+};
 
 unsigned long lastMsg = 0;
 char msg[WIFI_MSG_BUFFER_SIZE];
@@ -139,7 +139,7 @@ void setup() {
   http_setup();
 
   // HARDWARE
-  dht.begin();
+  // dht.begin();
 }
 
 // the loop function runs over and over again forever
