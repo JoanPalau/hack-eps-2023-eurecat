@@ -111,6 +111,17 @@ def daily_averages():
     return render_template('partials/averages.html', averages=averages)
 
 
+@app.route('/alexa/last', methods=['GET'])
+def alexa_last():
+    last = Data.query.order_by(Data.id.desc()).first()
+    return {
+            "temperature": last.temperature,
+            "light": last.light,
+            "soil_humidity": last.soil_humidity,
+            "air_humidity": last.air_humidity,
+            }
+
+
 @app.route('/partial/last', methods=['GET'])
 @login_required
 def last():
