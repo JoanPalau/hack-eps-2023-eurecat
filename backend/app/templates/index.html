@@ -30,31 +30,107 @@
         </div>
     </div>
 
-    <div class="bg-white p-8 rounded shadow">
-        <div class="bg-gray-200/20 p-4 mb-4 text-cyan-500">
-            You can manually trigger the water pump by selecting a device
-            and then by clicking on the button below.
-        </div>
-        <div class="grid grid-cols-4 gap-4">
-            <!-- Select -->
-            <select class="col-span-3 p-2 border border-gray-300 rounded" hx-get="/partial/devices_select" hx-trigger="load" hx-swap="innerHTML">
-            </select>
+    <div class="bg-gray-200/20 p-4 mb-4 text-cyan-500">
+        You can manually trigger the water pump by selecting a device
+        and then by clicking on the button below.
+    </div>
+    <div class="bg-gray-200/20 p-4 mb-4 mt-4 text-cyan-500">
+        You can change the humidity sensor configuration by selecting the 
+        one which will be recorded, from air to soil to all.
+    </div>
+    <div class="grid grid-cols-4 gap-4">
+        <!-- Start -->
+        <div class="bg-white p-8 rounded shadow text-center">
+            <h1 class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-emerald-500 md:text-5xl lg:text-6xl dark:text-white">Tomato</h1>
+            <div class="p-4 text-black font-bold text-center">Water pump</div>
+            <div class="grid grid-cols-4 gap-4">
+                <!-- Select -->
+                <select class="col-span-3 p-2 border border-gray-300 rounded" hx-get="/partial/devices_select" hx-trigger="load" hx-swap="innerHTML">
+                </select>
 
-            <!-- Button -->
-            <button 
-                hx-get="/partial/pump"
-                hx-trigger="click"
-                hx-swap="innerHTML"
-                hx-target="#notification"
-                class="col-span-1 bg-blue-500 text-white p-2 rounded">PUMP IT!</button>
-        </div>
+                <!-- Button -->
+                <button 
+                    hx-get="/partial/pump"
+                    hx-trigger="click"
+                    hx-swap="innerHTML"
+                    hx-target="#notification"
+                    class="col-span-1 bg-blue-500 text-white p-2 rounded">PUMP IT!</button>
+            </div>
 
-        <div class="bg-gray-200/20 p-4 mb-4 mt-4 text-cyan-500">
-            You can change the humidity sensor configuration by selecting the 
-            one which will be recorded, from air to soil to all.
+            <div class="p-4 text-black font-bold text-center">Humidity Sensor</div>
+            <div class="grid grid-cols-3" hx-get="/partial/humidity-toggle/tomatoe" hx-trigger="load" id="humidity-tomatoe-toggle">
+            </div>
         </div>
-        <div class="grid grid-cols-3" hx-get="/partial/humidity-toggle" hx-trigger="load" id="humidity-toggle">
+        <!-- End -->
+        <!-- Start -->
+        <div class="bg-white p-8 rounded shadow text-center">
+            <h1 class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-emerald-500 md:text-5xl lg:text-6xl dark:text-white">Potato</h1>
+            <div class="p-4 text-black font-bold text-center">Water pump</div>
+            <div class="grid grid-cols-4 gap-4">
+                <!-- Select -->
+                <select class="col-span-3 p-2 border border-gray-300 rounded" hx-get="/partial/devices_select" hx-trigger="load" hx-swap="innerHTML">
+                </select>
+
+                <!-- Button -->
+                <button 
+                    hx-get="/partial/pump"
+                    hx-trigger="click"
+                    hx-swap="innerHTML"
+                    hx-target="#notification"
+                    class="col-span-1 bg-blue-500 text-white p-2 rounded">PUMP IT!</button>
+            </div>
+
+            <div class="p-4 text-black font-bold text-center">Humidity Sensor</div>
+            <div class="grid grid-cols-3" hx-get="/partial/humidity-toggle/potatoe" hx-trigger="load" id="humidity-potatoe-toggle">
+            </div>
         </div>
+        <!-- End -->
+        <!-- Start -->
+        <div class="bg-white p-8 rounded shadow text-center">
+            <h1 class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-emerald-500 md:text-5xl lg:text-6xl dark:text-white">Onion</h1>
+            <div class="p-4 text-black font-bold text-center">Water pump</div>
+            <div class="grid grid-cols-4 gap-4">
+                <!-- Select -->
+                <select class="col-span-3 p-2 border border-gray-300 rounded" hx-get="/partial/devices_select" hx-trigger="load" hx-swap="innerHTML">
+                </select>
+
+                <!-- Button -->
+                <button 
+                    hx-get="/partial/pump"
+                    hx-trigger="click"
+                    hx-swap="innerHTML"
+                    hx-target="#notification"
+                    class="col-span-1 bg-blue-500 text-white p-2 rounded">PUMP IT!</button>
+            </div>
+
+            <div class="p-4 text-black font-bold text-center">Humidity Sensor</div>
+            <div class="grid grid-cols-3" hx-get="/partial/humidity-toggle/onion" hx-trigger="load" id="humidity-onion-toggle">
+            </div>
+        </div>
+        <!-- End -->
+        <!-- Start -->
+        <div class="bg-white p-8 rounded shadow text-center">
+            <h1 class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-emerald-500 md:text-5xl lg:text-6xl dark:text-white">Nuts</h1>
+            <div class="p-4 text-black font-bold text-center">Water pump</div>
+            <div class="grid grid-cols-4 gap-4">
+                <!-- Select -->
+                <select class="col-span-3 p-2 border border-gray-300 rounded" hx-get="/partial/devices_select" hx-trigger="load" hx-swap="innerHTML">
+                </select>
+
+                <!-- Button -->
+                <button 
+                    hx-get="/partial/pump"
+                    hx-trigger="click"
+                    hx-swap="innerHTML"
+                    hx-target="#notification"
+                    class="col-span-1 bg-blue-500 text-white p-2 rounded">PUMP IT!</button>
+            </div>
+
+            <div class="p-4 text-black font-bold text-center">Humidity Sensor</div>
+            <div class="grid grid-cols-3" hx-get="/partial/humidity-toggle/nuts" hx-trigger="load" id="humidity-nuts-toggle">
+            </div>
+        </div>
+        <!-- End -->
     </div>
 
     <div class="relative py-4">
