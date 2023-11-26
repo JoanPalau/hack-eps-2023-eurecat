@@ -32,6 +32,22 @@
         },
         options: {
             scales: {
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        displayFormats: {
+                            'millisecond': 'DD HH:mm',
+                            'second': 'DD HH:mm',
+                            'minute': 'DD HH:mm',
+                            'hour': 'DD HH:mm',
+                            'day': 'DD HH:mm',
+                            'week': 'DD HH:mm',
+                            'month': 'DD HH:mm',
+                            'quarter': 'DD HH:mm',
+                            'year': 'DD HH:mm',
+                        }
+                    }
+                }],
                 x: {
                     type: 'time',
                     time: {
