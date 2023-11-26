@@ -28,7 +28,11 @@ def tables():
 @app.route('/save_data', methods=['POST'])
 def save_data():
     data = request.json
-    data['fields'].append(data['farm'])
+    if type(data) == dict:
+        data['fields'].append(data['farm'])
+    else:
+        data = {'fields': [data]}
+
     for field in data['fields']:
         db.session.add(Data(
             device_id=field.get('id'),
