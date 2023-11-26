@@ -149,7 +149,7 @@ def devices_select():
 
 
 @app.route('/partial/pump', methods=['POST'])
-@login_required
+@app.route('/alexa/pump', methods=['GET'])
 def pump():
     # Day it's true if its before 7pm and after 7am
     publish_data({
@@ -161,6 +161,7 @@ def pump():
 
 
 @app.route('/partial/humidity-toggle/<fruit>', methods=['GET'])
+@login_required
 def humidity_toggle(fruit):
     configuration = Configuration.query.filter_by(
             key="humidity-" + fruit).first()
@@ -169,6 +170,7 @@ def humidity_toggle(fruit):
 
 
 @app.route('/partial/humidity/<fruit>/<setting>', methods=['POST'])
+@app.route('/alexa/humidity/<fruit>/<setting>', methods=['GET'])
 def humidity_switch(fruit, setting):
     configuration = Configuration.query.filter_by(
             key="humidity-" + fruit).first()
