@@ -131,10 +131,14 @@ def alexa_last():
 
 
 @app.route('/partial/last', methods=['GET'])
+@app.route('/partial/last/<device>', methods=['GET'])
 @login_required
-def last():
-    previous = Data.query.order_by(Data.id.desc()).offset(1).first()
-    last = Data.query.order_by(Data.id.desc()).first()
+def last(device=None):
+    if not device:
+        device = "NUTS"
+    query = Data.query.filter_by(device_id=device)
+    previous = query.order_by(Data.id.desc()).offset(1).first()
+    last = query.order_by(Data.id.desc()).first()
     temperature = round(
             db.session.query(db.func.avg(Data.temperature)).scalar(), 2)
     light = round(
