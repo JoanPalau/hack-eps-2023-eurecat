@@ -148,7 +148,7 @@ def devices_select():
     return render_template('partials/devices_select.html', devices=devices)
 
 
-@app.route('/partial/pump', methods=['GET'])
+@app.route('/partial/pump', methods=['POST'])
 @login_required
 def pump():
     # Day it's true if its before 7pm and after 7am
@@ -168,7 +168,7 @@ def humidity_toggle(fruit):
                            humidity=configuration, fruit=fruit)
 
 
-@app.route('/partial/humidity/<fruit>/<setting>', methods=['GET'])
+@app.route('/partial/humidity/<fruit>/<setting>', methods=['POST'])
 def humidity_switch(fruit, setting):
     configuration = Configuration.query.filter_by(
             key="humidity-" + fruit).first()

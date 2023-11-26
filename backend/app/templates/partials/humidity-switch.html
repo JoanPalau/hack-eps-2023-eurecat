@@ -1,17 +1,17 @@
 <button 
-    hx-get="/partial/humidity/{{fruit}}/all"
+    hx-post="/partial/humidity/{{fruit}}/all"
     hx-trigger="click"
     hx-swap="innerHTML"
     hx-target="#humidity-{{fruit}}-toggle"
     class="col-span-1 bg-emerald-500{%if humidity.value != "all"%}/50{%endif%}  text-lg text-white p-2 rounded-l-full">All</button>
 <button 
-    hx-get="/partial/humidity/{{fruit}}/air"
+    hx-post="/partial/humidity/{{fruit}}/air"
     hx-trigger="click"
     hx-swap="innerHTML"
     hx-target="#humidity-{{fruit}}-toggle"
     class="col-span-1 bg-emerald-500{%if humidity.value != "air"%}/50{%endif%}  text-lg text-white p-2"><i class="fa-solid fa-plane-departure"></i> Air</button>
 <button 
-    hx-get="/partial/humidity/{{fruit}}/soil"
+    hx-post="/partial/humidity/{{fruit}}/soil"
     hx-trigger="click"
     hx-swap="innerHTML"
     hx-target="#humidity-{{fruit}}-toggle"
