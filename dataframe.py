@@ -1,23 +1,6 @@
+import os
 import pandas as pd
 import statsmodels.api as sm
-
-from functools import lru_cache
-import time
-
-
-def get_ttl_hash(seconds=60 * 60):
-    """Return the same value withing `seconds` time period"""
-    return round(time.time() / seconds)
-
-
-def is_positive(x):
-    if x is None:
-        return False
-    try:
-        x = int(x)
-    except ValueError:
-        return False
-    return x > 0
 
 
 def predict_next_48_hours(input_df):
@@ -58,3 +41,14 @@ def predict_next_48_hours(input_df):
         start=hourly_data.index[-1], periods=49, freq='H')[1:])
 
     return forecast_df
+
+# Example usage (your colleague would replace 'your_dataframe' with their DataFrame)
+# forecasted_values = predict_next_48_hours(your_dataframe)
+
+
+df = pd.read_sql_table('data', os.environ.get('HACKEPS_DATABASE_URI'))
+df = df.drop(columns=['device_id', 'id', 'extra_data'])
+df_indexed = df.set_index('created_at').copy()
+print(df_indexed)
+test = predict_next_48_hours(df_indexed)
+import pdb; pdb.set_trace()

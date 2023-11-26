@@ -1,11 +1,14 @@
 import datetime
+import pandas as pd
 from flask import request, render_template
 from flask_security import login_required
 
 from app import app, db
 from app.models import Data, Configuration
-from app.utils import is_positive
+from app.utils import is_positive, predict_next_48_hours
 from app.mqtt import publish_data
+
+from config import Config
 
 
 @app.route('/')
@@ -23,20 +26,25 @@ def tables():
 
 
 @app.route('/save_data', methods=['POST'])
-@login_required
 def save_data():
     data = request.json
-    db.session.add(Data(
-        device_id=data.get('id'),
-        temperature=data.get('temperature') if is_positive(
-            data.get('temperature')) else None,
-        light=data.get('light') if is_positive(
-            data.get('light')) else None,
-        soil_humidity=data.get('soil_humidity') if is_positive(
-            data.get('soil_humidity')) else None,
-        air_humidity=data.get('air_humidity') if is_positive(
-            data.get('air_humidity')) else None,
-        ))
+    if type(data) == dict:
+        data['fields'].append(data['farm'])
+    else:
+        data = {'fields': [data]}
+
+    for field in data['fields']:
+        db.session.add(Data(
+            device_id=field.get('id'),
+            temperature=field.get('temperature') if is_positive(
+                field.get('temperature')) else None,
+            light=field.get('light') if is_positive(
+                field.get('light')) else None,
+            soil_humidity=field.get('soil_humidity') if is_positive(
+                field.get('soil_humidity')) else None,
+            air_humidity=field.get('air_humidity') if is_positive(
+                field.get('air_humidity')) else None,
+            ))
     try:
         db.session.commit()
     except Exception as e:
@@ -181,7 +189,6 @@ def humidity_toggle(fruit):
 
 
 @app.route('/partial/humidity/<fruit>/<setting>', methods=['POST'])
-@app.route('/alexa/humidity/<fruit>/<setting>', methods=['GET'])
 def humidity_switch(fruit, setting):
     configuration = Configuration.query.filter_by(
             key="humidity-" + fruit).first()
@@ -192,3 +199,20 @@ def humidity_switch(fruit, setting):
     publish_data({"dhtmode": setting, "fruit": fruit})
     return render_template('partials/humidity-switch.html',
                            humidity=configuration, fruit=fruit)
+
+
+@app.route('/partial/forecast', methods=['GET'])
+def forecast():
+    df = pd.read_sql_table('data', Config.SQLALCHEMY_DATABASE_URI)
+    df = df.drop(columns=['device_id', 'id', 'extra_data'])
+    df_indexed = df.set_index('created_at').copy()
+    forecast = predict_next_48_hours(df_indexed)
+
+    forecast.index = (forecast.index - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s')
+
+    labels = forecast.columns.tolist()
+    date_labels = forecast.index.tolist()
+    values = [forecast[col].tolist() for col in forecast.columns]
+
+    return render_template('partials/forecast.html', labels=labels,
+                           values=values, date_labels=date_labels)
