@@ -1,3 +1,4 @@
+import datetime
 from flask import request, render_template
 
 from app import app, db
@@ -138,25 +139,31 @@ def devices_select():
 
 @app.route('/partial/pump', methods=['GET'])
 def pump():
-    publish_data({"pump": True})
+    # Day it's true if its before 7pm and after 7am
+    publish_data({
+        "pump": True,
+        "day": 7 <= datetime.datetime.now().hour <= 19,
+        })
     return render_template('partials/notification.html',
                            message='Pump correctly activated')
 
 
-@app.route('/partial/humidity-toggle', methods=['GET'])
-def humidity_toggle():
-    configuration = Configuration.query.filter_by(key="humidity").first()
+@app.route('/partial/humidity-toggle/<fruit>', methods=['GET'])
+def humidity_toggle(fruit):
+    configuration = Configuration.query.filter_by(
+            key="humidity-" + fruit).first()
     return render_template('partials/humidity-switch.html',
-                           humidity=configuration)
+                           humidity=configuration, fruit=fruit)
 
 
-@app.route('/partial/humidity/<setting>', methods=['GET'])
-def humidity_switch(setting):
-    configuration = Configuration.query.filter_by(key="humidity").first()
+@app.route('/partial/humidity/<fruit>/<setting>', methods=['GET'])
+def humidity_switch(fruit, setting):
+    configuration = Configuration.query.filter_by(
+            key="humidity-" + fruit).first()
     if setting not in ['all', 'air', 'soil']:
         setting = 'all'
     configuration.value = setting
     db.session.commit()
-    publish_data({"dhtmode": setting})
+    publish_data({"dhtmode": setting, "fruit": fruit})
     return render_template('partials/humidity-switch.html',
-                           humidity=configuration)
+                           humidity=configuration, fruit=fruit)
