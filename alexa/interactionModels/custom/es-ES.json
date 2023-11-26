@@ -1,0 +1,68 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "slots": [],
+          "name": "ConsultIntent",
+          "samples": [
+            "cuales son tus ultimos datos",
+            "dime la ultima lectura",
+            "cual es la ultima lectura"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "slots": [],
+          "name": "riegaTomatesIntent",
+          "samples": [
+            "riega tomate",
+            "riega tomates",
+            "riega los tomates"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "riegaPatataIntent",
+          "samples": [
+            "riega patatas",
+            "riega las patatas"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "riegaNuecesIntent",
+          "samples": [
+            "riega nueces",
+            "riega las nueces"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "riegaCebollasIntent",
+          "samples": [
+            "riega cebollas",
+            "riega las cebollas"
+          ]
+        }
+      ],
+      "types": [],
+      "invocationName": "puto arduino"
+    }
+  }
+}
