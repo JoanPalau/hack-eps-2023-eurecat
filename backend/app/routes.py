@@ -121,7 +121,8 @@ def daily_averages():
 
 @app.route('/alexa/last', methods=['GET'])
 def alexa_last():
-    last = Data.query.order_by(Data.id.desc()).first()
+    last = Data.query.filter_by(device_id="NUTS").order_by(
+            Data.id.desc()).first()
     return {
             "temperature": last.temperature,
             "light": last.light,
