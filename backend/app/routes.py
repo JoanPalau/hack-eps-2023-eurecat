@@ -161,7 +161,6 @@ def pump():
 
 
 @app.route('/partial/humidity-toggle/<fruit>', methods=['GET'])
-@login_required
 def humidity_toggle(fruit):
     configuration = Configuration.query.filter_by(
             key="humidity-" + fruit).first()
@@ -170,7 +169,6 @@ def humidity_toggle(fruit):
 
 
 @app.route('/partial/humidity/<fruit>/<setting>', methods=['GET'])
-@login_required
 def humidity_switch(fruit, setting):
     configuration = Configuration.query.filter_by(
             key="humidity-" + fruit).first()
