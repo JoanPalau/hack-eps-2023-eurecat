@@ -189,7 +189,6 @@ def humidity_toggle(fruit):
 
 
 @app.route('/partial/humidity/<fruit>/<setting>', methods=['POST'])
-@app.route('/alexa/humidity/<fruit>/<setting>', methods=['GET'])
 def humidity_switch(fruit, setting):
     configuration = Configuration.query.filter_by(
             key="humidity-" + fruit).first()
