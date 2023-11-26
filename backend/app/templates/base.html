@@ -30,11 +30,17 @@
 
     <!-- Header -->
     <header class="bg-blue-500 p-4 text-white flex justify-center items-center">
+        <div class="flex-1"></div>
+        <div class="flex-1 text-left">
             <h1 class="text-3xl flex items-center justify-center">
             <img src="{{url_for('static', filename='img/vibrani.png')}}" alt="Image Alt Text" class="mr-2 h-8 w-8"> <!-- Adjust the image URL and size as needed -->
             Vibrani Dashboard 
         </h1>
+        </div>
 
+        <div class="flex-1 text-right">
+            <a href="{{url_for('security.logout')}}" class="text-lg hover:text-blue-300">Logout</a>
+        </div>
     </header>
 
 

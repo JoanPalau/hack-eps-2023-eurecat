@@ -1,5 +1,6 @@
 import datetime
 from flask import request, render_template
+from flask_security import login_required
 
 from app import app, db
 from app.models import Data, Configuration
@@ -9,17 +10,20 @@ from app.mqtt import publish_data
 
 @app.route('/')
 @app.route('/index')
+@login_required
 def index():
     return render_template('index.html')
 
 
 @app.route('/tables')
+@login_required
 def tables():
     data = Data.query.all()
     return render_template('tables.html', data=data)
 
 
 @app.route('/save_data', methods=['POST'])
+@login_required
 def save_data():
     data = request.json
     db.session.add(Data(
@@ -41,11 +45,13 @@ def save_data():
 
 
 @app.route('/graph')
+@login_required
 def graph():
     return render_template('graph.html')
 
 
 @app.route('/graph/<stat>')
+@login_required
 def graph_stat(stat):
     devices = Data.query.with_entities(Data.device_id).distinct()
     labels = [d[0] for d in devices]
@@ -64,6 +70,7 @@ def graph_stat(stat):
 
 # Partial routes for htmx
 @app.route('/partial/averages', methods=['GET'])
+@login_required
 def averages():
     temperature = round(
             db.session.query(db.func.avg(Data.temperature)).scalar(), 2)
@@ -83,6 +90,7 @@ def averages():
 
 
 @app.route('/partial/daily_averages', methods=['GET'])
+@login_required
 def daily_averages():
     temperature = round(
             db.session.query(db.func.avg(Data.temperature)).scalar(), 2)
@@ -103,7 +111,19 @@ def daily_averages():
     return render_template('partials/averages.html', averages=averages)
 
 
+@app.route('/alexa/last', methods=['GET'])
+def alexa_last():
+    last = Data.query.order_by(Data.id.desc()).first()
+    return {
+            "temperature": last.temperature,
+            "light": last.light,
+            "soil_humidity": last.soil_humidity,
+            "air_humidity": last.air_humidity,
+            }
+
+
 @app.route('/partial/last', methods=['GET'])
+@login_required
 def last():
     previous = Data.query.order_by(Data.id.desc()).offset(1).first()
     last = Data.query.order_by(Data.id.desc()).first()
@@ -126,18 +146,21 @@ def last():
 
 
 @app.route('/partial/last_records', methods=['GET'])
+@login_required
 def last_records():
     last_records = Data.query.order_by(Data.id.desc()).limit(10).all()
     return render_template('partials/last_records.html', last=last_records)
 
 
 @app.route('/partial/devices_select', methods=['GET'])
+@login_required
 def devices_select():
     devices = Data.query.with_entities(Data.device_id).distinct()
     return render_template('partials/devices_select.html', devices=devices)
 
 
-@app.route('/partial/pump', methods=['GET'])
+@app.route('/partial/pump', methods=['POST'])
+@app.route('/alexa/pump', methods=['GET'])
 def pump():
     # Day it's true if its before 7pm and after 7am
     publish_data({
@@ -149,6 +172,7 @@ def pump():
 
 
 @app.route('/partial/humidity-toggle/<fruit>', methods=['GET'])
+@login_required
 def humidity_toggle(fruit):
     configuration = Configuration.query.filter_by(
             key="humidity-" + fruit).first()
@@ -156,7 +180,8 @@ def humidity_toggle(fruit):
                            humidity=configuration, fruit=fruit)
 
 
-@app.route('/partial/humidity/<fruit>/<setting>', methods=['GET'])
+@app.route('/partial/humidity/<fruit>/<setting>', methods=['POST'])
+@app.route('/alexa/humidity/<fruit>/<setting>', methods=['GET'])
 def humidity_switch(fruit, setting):
     configuration = Configuration.query.filter_by(
             key="humidity-" + fruit).first()

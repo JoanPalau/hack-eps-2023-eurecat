@@ -1,0 +1,38 @@
+{% extends "base_security.html" %}
+
+{% block content %}
+<div class="bg-gray-100 font-sans flex items-center justify-center h-screen">
+
+    <div class="bg-white p-8 rounded shadow-md w-96">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Login</h2>
+
+        <form action="{{ url_for_security('login') }}" method="POST" name="login_user_form" class="form-signin">
+        {{ login_user_form.hidden_tag() }}
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
+                {{ render_field_with_errors(login_user_form.email, id='inputEmail', class_="mt-1 p-2 w-full border rounded-md", placeholder="Email Address", required=True, autofocus=True) }}
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="block text-sm font-medium text-gray-600">Password</label>
+                {{ render_field_with_errors(login_user_form.password, id="inputPassword", class_="mt-1 p-2 w-full border rounded-md", placeholder="Password") }}
+            </div>
+
+            <div class="checkbox mb-3">
+                <label>
+                  <input type="checkbox" value="remember-me"> Remember me
+                </label>
+            </div>
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded-md w-full">Login</button>
+        </form>
+    </div>
+        <footer class="absolute bg-blue-500 p-2 text-white bottom-0 w-full">
+            <p class="text-center">&copy; 2023 Vibrani</p>
+        </footer>
+</div>
+
+{% endblock %}
+
+{% block custom_styles %}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+{% endblock %}

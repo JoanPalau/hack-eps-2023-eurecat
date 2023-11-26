@@ -64,3 +64,11 @@ flask run
 ```
 
 Visit [http://localhost:5000](http://localhost:5000) in your web browser to access the application.
+
+## Adding users
+
+To add users you must use the following commands:
+```bash
+flask users create email
+flask users activate email
+```
