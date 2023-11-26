@@ -54,8 +54,8 @@ const char* HTTP_SERVER_URL = "http://pondere.es:8004/save_data";
 const int MIN_LIGHT = 640;
 const int MAX_LIGHT = 910;
 
-const int MAX_HUM = 500;
-const int MIN_HUM = 550;
+const int MAX_HUM = 550;
+const int MIN_HUM = 500;
 
 const int OUTPUT_MIN = 0;
 const int OUTPUT_MAX = 100;
@@ -79,11 +79,6 @@ struct farmActionsStruct {
   bool day;
 };
 
-struct storePayload {
-  struct farmDataStruct farm;
-  struct farmDataStruct fields[1];
-};
-
 unsigned long lastMsg = 0;
 char msg[WIFI_MSG_BUFFER_SIZE];
 int value = 0;
@@ -96,9 +91,6 @@ struct farmActionsStruct farmActions = {"all", false, true};
 int lightState = 0;
 int pumpState = 0;
 struct farmDataStruct fieldData = {"NUTS", -1, -1, -1, -1};
-
-// payload
-struct storePayload storePayload = { farmData, {fieldData} };
 
 /*
  * Sets up the WiFI connection
@@ -184,6 +176,11 @@ void control_water_pump(bool active);
  */
 int map(int value, int start1, int end1, int start2, int end2);
 
+/*
+ * handles the serialization of the data to store FARM + FIELD 
+ */
+String serialize_data_to_store();
+
 // Serial port displays to show status of the connection process
 void displayConnectingWifiMessage();
 void displayStartConnectingWiFiMessage();
@@ -219,8 +216,8 @@ void loop() {
 
   // UPDATE HARDWARE STATUS
   control_light_system(!farmActions.day);
-  control_light_gh_readings("all");
-  control_water_pump(false);
+  control_light_gh_readings(farmActions.dhtmode);
+  control_water_pump(farmActions.pump);
 
   // COMS
   handle_mqtt();
@@ -319,20 +316,11 @@ void parse_actions_data(byte* payload, unsigned int length) {
 
 void store_data()
 {
-  StaticJsonDocument<192> doc;
-
-  doc["id"] = farmData.id;
-  doc["light"] =farmData.light;
-  doc["soil_humidity"] = farmData.soil_humidity;
-  doc["air_humidity"] = farmData.air_humidity;
-  doc["temperature"] = farmData.temperature;
-
   http.begin(wifiClient, HTTP_SERVER_URL);
 
   http.addHeader("Content-Type", "application/json");
 
-  String postMessage;
-  serializeJson(doc, postMessage);
+  String postMessage = serialize_data_to_store();
   int httpResponseCode = http.POST(postMessage);
 }
 
@@ -345,8 +333,8 @@ void read_dht()
   if (isnan(h)) {
     Serial.println("Failed to read from DHT sensor!");
   } else {
-    farmData.air_humidity = h;
-    Serial.println(h);
+    fieldData.air_humidity = h;
+    Serial.println(fieldData.air_humidity);
   }
 
   int t = (int)dht.readTemperature();
@@ -354,14 +342,14 @@ void read_dht()
   if (isnan(t)) {
     Serial.println("Failed to read from DHT sensor!");
   } else {
-    farmData.temperature = t;
-    Serial.println(t);
+    fieldData.temperature = t;
+    Serial.println(fieldData.temperature);
   }
 }
 
 void read_gh()
 {
-  fieldData.soil_humidity = map(analogRead(ANALOG_IN), MIN_HUM, MAX_HUM, OUTPUT_MIN, OUTPUT_MAX);
+  fieldData.soil_humidity = mapInversed(analogRead(ANALOG_IN), MIN_HUM, MAX_HUM, OUTPUT_MIN, OUTPUT_MAX);
   Serial.println("SOIL HUMIDITY");
   Serial.println(fieldData.soil_humidity);
 }
@@ -465,6 +453,47 @@ void http_setup()
 int map(int value, int start1, int end1, int start2, int end2) {
   return start2 + (int)(((long long)(end2 - start2) * (value - start1)) / (end1 - start1));
 }
+
+int mapInversed(int value, int start1, int end1, int start2, int end2) {
+  return start2 + (end2 - start2) * (1 - ((value - start1)) / (end1 - start1));
+}
+
+String serialize_data_to_store() 
+{
+  const size_t capacity = JSON_OBJECT_SIZE(7) + 1 * JSON_OBJECT_SIZE(6) + 300; // Adjust the capacity based on your data size
+  StaticJsonDocument<capacity> doc;
+
+  // Create a JsonObject to hold the storePayload data
+  JsonObject payloadObj = doc.to<JsonObject>();
+
+  // Create JsonObject for farm and fields
+  JsonObject farmObj = payloadObj.createNestedObject("farm");
+  farmObj["id"] = farmData.id;
+  farmObj["light"] =farmData.light;
+  farmObj["soil_humidity"] = farmData.soil_humidity;
+  farmObj["air_humidity"] = farmData.air_humidity;
+  farmObj["temperature"] = farmData.temperature;
+
+  JsonArray fieldsArray = payloadObj.createNestedArray("fields");
+  for (size_t i = 0; i < 1; ++i) {
+      JsonObject fieldObj = fieldsArray.createNestedObject();
+      fieldObj["id"] = fieldData.id;
+      fieldObj["light"] = fieldData.light;
+      fieldObj["soil_humidity"] = fieldData.soil_humidity;
+      fieldObj["air_humidity"] = fieldData.air_humidity;
+      Serial.println("SEND AIR H VALUE");
+      Serial.println(fieldData.air_humidity);
+      Serial.println("SEND AIR T VALUE");
+      Serial.println(fieldData.temperature);
+      fieldObj["temperature"] = fieldData.temperature;
+  }
+
+  // Serialize the JSON document
+  String serializedPayload;
+  serializeJson(doc, serializedPayload);
+
+  return serializedPayload;
+};
 
 // HELPER FUNCTIONS
 
