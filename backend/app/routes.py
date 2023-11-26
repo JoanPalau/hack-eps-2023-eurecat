@@ -1,11 +1,14 @@
 import datetime
+import pandas as pd
 from flask import request, render_template
 from flask_security import login_required
 
 from app import app, db
 from app.models import Data, Configuration
-from app.utils import is_positive
+from app.utils import is_positive, predict_next_48_hours
 from app.mqtt import publish_data
+
+from config import Config
 
 
 @app.route('/')
@@ -192,3 +195,20 @@ def humidity_switch(fruit, setting):
     publish_data({"dhtmode": setting, "fruit": fruit})
     return render_template('partials/humidity-switch.html',
                            humidity=configuration, fruit=fruit)
+
+
+@app.route('/partial/forecast', methods=['GET'])
+def forecast():
+    df = pd.read_sql_table('data', Config.SQLALCHEMY_DATABASE_URI)
+    df = df.drop(columns=['device_id', 'id', 'extra_data'])
+    df_indexed = df.set_index('created_at').copy()
+    forecast = predict_next_48_hours(df_indexed)
+
+    forecast.index = (forecast.index - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s')
+
+    labels = forecast.columns.tolist()
+    date_labels = forecast.index.tolist()
+    values = [forecast[col].tolist() for col in forecast.columns]
+
+    return render_template('partials/forecast.html', labels=labels,
+                           values=values, date_labels=date_labels)

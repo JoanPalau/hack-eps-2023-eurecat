@@ -1,0 +1,79 @@
+<canvas id="myChart"></canvas>
+<script>
+    // Extract data from Flask template variables
+    var labels = {{ labels | tojson | safe }};
+    var values = {{ values | tojson | safe }};
+    var date_labels = {{ date_labels | tojson | safe }};
+    console.log(date_labels);
+
+    // Convert datetime strings to JavaScript Date objects
+    var datetimeLabels = date_labels.map(function (label) {
+        return new Date(label);
+    });
+
+    // Create datasets for each sensor reading
+    var datasets = values.map(function (value, index) {
+        return {
+            label: labels[index],
+            data: value,
+            borderColor: getRandomColor(),
+            borderWidth: 1,
+            fill: false
+        };
+    });
+
+    // Create a line chart using Chart.js
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: datetimeLabels,
+            datasets: datasets
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        parser: 'MM/DD HH:mm',
+                        tooltipFormat: 'll HH:mm',
+                        unit: 'day',
+                        unitStepSize: 1,
+                        displayFormats: {
+                            'day': 'MM/DD'
+                        }
+                    },
+                    position: 'bottom',
+                    ticks: {
+                        callback: function(value, index, ticks) {
+                            var dateObj = new Date(value * 1000); // Assuming value is a Unix timestamp
+                            var formattedDate = dateObj.toLocaleTimeString();
+                            return formattedDate;
+                        }
+                    }
+                }
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    title: function (tooltipItem, data) {
+                        var timestamp = data.labels[tooltipItem[0].index];
+                        var dateObj = new Date(timestamp * 1000); // Convert Unix timestamp to milliseconds
+                        return dateObj.toLocaleTimeString(); // Adjust the format as needed
+                    }
+                }
+            }
+        }
+    });
+
+    // Function to generate random colors for each dataset
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+</script>
