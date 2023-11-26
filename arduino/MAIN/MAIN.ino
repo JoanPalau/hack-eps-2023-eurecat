@@ -206,6 +206,7 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
+  // Health check -> CODE IS RUNNING
   digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
   delay(1000);                      // wait for a second
   digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
@@ -294,7 +295,7 @@ void parse_data(byte* payload, unsigned int length)
 }
 
 void parse_actions_data(byte* payload, unsigned int length) {
-//{"id": "P_03_HOME", "light": 99, "soil_humidity": 39, "air_humidity": 55, "temperature": 99}
+  //{"dhtmode": -1, "pump": true, "day": false, "fruit": -1}'
   String content = String((const char *)payload);
   Serial.println(content);
 
@@ -307,7 +308,6 @@ void parse_actions_data(byte* payload, unsigned int length) {
 
   String dhtmode_candidate = doc["dhtmode"];
   if(strcmp(dhtmode_candidate.c_str(), "-1") != 0) {
-    Serial.println("Valid DHT_MODE candidate!");
     farmActions.dhtmode = dhtmode_candidate;
   }
   farmActions.day = doc["day"];
@@ -328,37 +328,30 @@ void store_data()
 void read_dht()
 {
   int h = (int)dht.readHumidity();
-  Serial.println("AIR_HUM");
-  
   if (isnan(h)) {
     Serial.println("Failed to read from DHT sensor!");
   } else {
     fieldData.air_humidity = h;
-    Serial.println(fieldData.air_humidity);
   }
 
   int t = (int)dht.readTemperature();
-  Serial.println("TEMP");
   if (isnan(t)) {
     Serial.println("Failed to read from DHT sensor!");
   } else {
     fieldData.temperature = t;
-    Serial.println(fieldData.temperature);
   }
 }
 
 void read_gh()
 {
+  // Read and map to correct date range
   fieldData.soil_humidity = mapInversed(analogRead(ANALOG_IN), MIN_HUM, MAX_HUM, OUTPUT_MIN, OUTPUT_MAX);
-  Serial.println("SOIL HUMIDITY");
-  Serial.println(fieldData.soil_humidity);
 }
 
 void read_light()
 {
+  // Read and map to correct date range
   fieldData.light = map(analogRead(ANALOG_IN), MIN_LIGHT, MAX_LIGHT, OUTPUT_MIN, OUTPUT_MAX);
-  Serial.println("SOIL LIGHT");
-  Serial.println(fieldData.light);
 }
 
 void control_light_gh_readings(String mode)
@@ -367,7 +360,6 @@ void control_light_gh_readings(String mode)
   // IMPORTANT!: dalays are used to let the signal stabilize
   const char* parsed_mode = mode.c_str();
   if(strcmp(parsed_mode, "all") == 0) {
-    Serial.println("I enter ALL");
     // setup correct ground read
     digitalWrite(GH_PIN, HIGH);
     digitalWrite(LIGHT_PIN, LOW);
@@ -414,6 +406,9 @@ void control_water_pump(bool active) {
   if(active && pumpState == LOW) {
     pumpState = HIGH;
     digitalWrite(PUMP_PIN, HIGH);
+    delay(3000);
+    pumpState = LOW;
+    digitalWrite(PUMP_PIN, LOW);
   } else if(!active && pumpState == HIGH) {
     pumpState = LOW;
     digitalWrite(PUMP_PIN, LOW);
@@ -481,10 +476,6 @@ String serialize_data_to_store()
       fieldObj["light"] = fieldData.light;
       fieldObj["soil_humidity"] = fieldData.soil_humidity;
       fieldObj["air_humidity"] = fieldData.air_humidity;
-      Serial.println("SEND AIR H VALUE");
-      Serial.println(fieldData.air_humidity);
-      Serial.println("SEND AIR T VALUE");
-      Serial.println(fieldData.temperature);
       fieldObj["temperature"] = fieldData.temperature;
   }
 
