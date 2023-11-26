@@ -4,15 +4,31 @@
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 
-// #include <DHT.h>
+#include <DHT.h>
 
 #define WIFI_MSG_BUFFER_SIZE (50)
 #define SERIAL_BAUD_RATE 9600
 #define NO_DATA_INPUT_INT -1
 
-// #define DHTPIN D4     // Digital pin connected to the DHT sensor
-// #define DHTTYPE DHT11 // DHT 11
-// DHT dht(DHTPIN, DHTTYPE);
+#define DHTTYPE DHT11 // DHT 11
+
+// ANALOG INPUT PIN
+#define ANALOG_IN A0
+
+// LIGHT SYSTEM SWITCH PIN
+#define LED_1 D5
+
+// WATER PUMP SWITCH PIN
+#define PUMP_PIN D1
+
+// GH / LIGHT SWITCH PINS
+#define GH_PIN D3
+#define LIGHT_PIN D2
+
+// TEMP / HUM INPUT PIN
+#define TEMP_HUM_IN D6
+
+DHT dht(TEMP_HUM_IN, DHTTYPE);
 
 /*
  * This should not be hardcoded here, but it's a hackathon so...
@@ -29,11 +45,20 @@ const char* clientID ="grupo_2";
 const char* MQTT_CLIENT_NAME="grupo_2";
 const char* MQTT_CLIENT_PSWD="grupo_2";
 
-const char* MQTT_RECIEVE_TOPIC="hackeps/eurecat";
-const char* MQTT_SEND_TOPIC="hackeps/G2";
+const char* MQTT_DATA_TOPIC="hackeps/eurecat";
+const char* MQTT_ACTIONS_TOPIC="hackeps/G2";
 
 // HTTP
 const char* HTTP_SERVER_URL = "http://pondere.es:8004/save_data";
+
+const int MIN_LIGHT = 640;
+const int MAX_LIGHT = 910;
+
+const int MAX_HUM = 500;
+const int MIN_HUM = 550;
+
+const int OUTPUT_MIN = 0;
+const int OUTPUT_MAX = 100;
 
 // OTHER
 WiFiClient wifiClient;
@@ -51,6 +76,12 @@ struct farmDataStruct {
 struct farmActionsStruct {
   String dhtmode;
   bool pump;
+  bool day;
+};
+
+struct storePayload {
+  struct farmDataStruct farm;
+  struct farmDataStruct fields[1];
 };
 
 unsigned long lastMsg = 0;
@@ -58,7 +89,16 @@ char msg[WIFI_MSG_BUFFER_SIZE];
 int value = 0;
 
 // data
-struct farmDataStruct farmData = {"Patata", -1, -1, -1, -1};
+struct farmDataStruct farmData = {"GLOBAL", -1, -1, -1, -1};
+struct farmActionsStruct farmActions = {"all", false, true};
+
+// state
+int lightState = 0;
+int pumpState = 0;
+struct farmDataStruct fieldData = {"NUTS", -1, -1, -1, -1};
+
+// payload
+struct storePayload storePayload = { farmData, {fieldData} };
 
 /*
  * Sets up the WiFI connection
@@ -93,12 +133,12 @@ void handle_received_data(char* topic, byte* payload, unsigned int length);
 /*
  * Parses the payload and stores the info localy
  */
-void parse_data(char* topic, byte* payload, unsigned int length);
+void parse_data(byte* payload, unsigned int length);
 
 /*
  * Merges farm data with plant data, then, publishes the new data
  */
-void parse_actions_data(char* topic, byte* payload, unsigned int length);
+void parse_actions_data(byte* payload, unsigned int length);
 
 /*
  * Uses HTTP to store data to the backend
@@ -121,9 +161,28 @@ void read_gh();
 void read_light();
 
 /*
+ * Select operative mode for hardware switch between GH and LIGHT sensor
+ *  "all" -> read both
+ *  "air" -> light only
+ *  "soil" -> ground only
+ */
+void control_light_gh_readings(String mode);
+
+/*
+ * Activates / deactivates the light system
+ */
+void control_light_system(bool active);
+
+/*
  * Activates / deactivates the water pump
  */
 void control_water_pump(bool active);
+
+// HELPERS
+/*
+ * Translate range value from A to B
+ */
+int map(int value, int start1, int end1, int start2, int end2);
 
 // Serial port displays to show status of the connection process
 void displayConnectingWifiMessage();
@@ -132,14 +191,20 @@ void displayConnectedWiFiMessage();
 
 // START CODE
 void setup() {
-  // COMS
+  // DEBUG
   Serial.begin(SERIAL_BAUD_RATE);
+
+  // HARDWARE
+  dht.begin();
+  pinMode(LED_1, OUTPUT);
+  pinMode(PUMP_PIN, OUTPUT);
+  pinMode(GH_PIN, OUTPUT);
+  pinMode(LIGHT_PIN, OUTPUT);
+
+// COMS
   wifi_setup();
   mqtt_setup();
   http_setup();
-
-  // HARDWARE
-  // dht.begin();
 }
 
 // the loop function runs over and over again forever
@@ -149,6 +214,15 @@ void loop() {
   digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
   delay(1000);                      // wait for a second
 
+  // READ DHT
+  read_dht();
+
+  // UPDATE HARDWARE STATUS
+  control_light_system(!farmActions.day);
+  control_light_gh_readings("all");
+  control_water_pump(false);
+
+  // COMS
   handle_mqtt();
 }
 
@@ -173,7 +247,8 @@ void connect_mqtt()
   if (client.connect(clientID, MQTT_CLIENT_NAME, MQTT_CLIENT_PSWD))
   {
       // Read data 
-      client.subscribe(MQTT_RECIEVE_TOPIC);
+      client.subscribe(MQTT_DATA_TOPIC);
+      client.subscribe(MQTT_ACTIONS_TOPIC);
   }
   else
   {
@@ -185,31 +260,27 @@ void connect_mqtt()
   }
 }
 
-
-
 void handle_received_data(char* topic, byte* payload, unsigned int length)
 {
-  if(true) {
-    parse_data(topic, payload, length);
-    store_data();
-  } else {
+    payload[length] = '\0';
 
+    Serial.print("Message arrived [");
+    Serial.print(topic);
+    Serial.print("]: ");
+
+  if(strcmp(topic, MQTT_DATA_TOPIC) == 0) {
+    parse_data(payload, length);
+    store_data();
+  } else if(strcmp(topic, MQTT_ACTIONS_TOPIC) == 0){
+    parse_actions_data(payload, length);
   }
 }
 
-void parse_data(char* topic, byte* payload, unsigned int length)
+void parse_data(byte* payload, unsigned int length)
 {
   //{"id": "P_03_HOME", "light": 99, "soil_humidity": 39, "air_humidity": 55, "temperature": 99}
-  payload[length] = '\0';
-
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("]: ");
-  
   String content = String((const char *)payload);
-
   Serial.println(content);
-
 
   StaticJsonDocument<192> doc;
   DeserializationError error = deserializeJson(doc, content);
@@ -225,8 +296,25 @@ void parse_data(char* topic, byte* payload, unsigned int length)
   farmData.temperature = doc["temperature"];
 }
 
-void parse_actions_data(char* topic, byte* payload, unsigned int length) {
+void parse_actions_data(byte* payload, unsigned int length) {
+//{"id": "P_03_HOME", "light": 99, "soil_humidity": 39, "air_humidity": 55, "temperature": 99}
+  String content = String((const char *)payload);
+  Serial.println(content);
 
+  StaticJsonDocument<192> doc;
+  DeserializationError error = deserializeJson(doc, content);
+  if(error) {
+     Serial.println(error.f_str());
+     return;
+  }
+
+  String dhtmode_candidate = doc["dhtmode"];
+  if(strcmp(dhtmode_candidate.c_str(), "-1") != 0) {
+    Serial.println("Valid DHT_MODE candidate!");
+    farmActions.dhtmode = dhtmode_candidate;
+  }
+  farmActions.day = doc["day"];
+  farmActions.pump = doc["pump"];
 }
 
 void store_data()
@@ -249,22 +337,99 @@ void store_data()
 }
 
 // CONTROLER FUNCTIONS
-void read_dht(){
+void read_dht()
+{
+  int h = (int)dht.readHumidity();
+  Serial.println("AIR_HUM");
+  
+  if (isnan(h)) {
+    Serial.println("Failed to read from DHT sensor!");
+  } else {
+    farmData.air_humidity = h;
+    Serial.println(h);
+  }
 
+  int t = (int)dht.readTemperature();
+  Serial.println("TEMP");
+  if (isnan(t)) {
+    Serial.println("Failed to read from DHT sensor!");
+  } else {
+    farmData.temperature = t;
+    Serial.println(t);
+  }
 }
 
 void read_gh()
 {
-
+  fieldData.soil_humidity = map(analogRead(ANALOG_IN), MIN_HUM, MAX_HUM, OUTPUT_MIN, OUTPUT_MAX);
+  Serial.println("SOIL HUMIDITY");
+  Serial.println(fieldData.soil_humidity);
 }
 
 void read_light()
 {
+  fieldData.light = map(analogRead(ANALOG_IN), MIN_LIGHT, MAX_LIGHT, OUTPUT_MIN, OUTPUT_MAX);
+  Serial.println("SOIL LIGHT");
+  Serial.println(fieldData.light);
+}
 
+void control_light_gh_readings(String mode)
+{
+
+  // IMPORTANT!: dalays are used to let the signal stabilize
+  const char* parsed_mode = mode.c_str();
+  if(strcmp(parsed_mode, "all") == 0) {
+    Serial.println("I enter ALL");
+    // setup correct ground read
+    digitalWrite(GH_PIN, HIGH);
+    digitalWrite(LIGHT_PIN, LOW);
+    
+    delay(100);
+    read_gh();
+
+    // setup correct light read
+    digitalWrite(GH_PIN, LOW);
+    digitalWrite(LIGHT_PIN, HIGH);
+    delay(100);
+    read_light();
+
+  } else if(strcmp(parsed_mode, "soil") == 0) {
+    Serial.println("I enter SOIL");
+    digitalWrite(GH_PIN, HIGH);
+    digitalWrite(LIGHT_PIN, LOW);
+    delay(100);
+    read_gh();
+
+  } else if(strcmp(parsed_mode, "air") == 0) {
+    Serial.println("I enter AIR");
+    digitalWrite(GH_PIN, LOW);
+    digitalWrite(LIGHT_PIN, HIGH);
+    delay(100);
+    read_light();
+  }
+}
+
+void control_light_system(bool active)
+{
+  if (lightState == LOW && active) {
+    // turn LED on
+    lightState = HIGH;
+    digitalWrite(LED_1, HIGH);
+  } else if(lightState == HIGH && !active) {
+    // turn LED off
+    lightState = LOW;
+    digitalWrite(LED_1, LOW);
+  }
 }
 
 void control_water_pump(bool active) {
-
+  if(active && pumpState == LOW) {
+    pumpState = HIGH;
+    digitalWrite(PUMP_PIN, HIGH);
+  } else if(!active && pumpState == HIGH) {
+    pumpState = LOW;
+    digitalWrite(PUMP_PIN, LOW);
+  }
 }
 
 // SETUP FUNCTIONS
@@ -293,6 +458,12 @@ void mqtt_setup()
 void http_setup()
 {
   http.begin(wifiClient, HTTP_SERVER_URL);
+}
+
+// UTILS
+
+int map(int value, int start1, int end1, int start2, int end2) {
+  return start2 + (int)(((long long)(end2 - start2) * (value - start1)) / (end1 - start1));
 }
 
 // HELPER FUNCTIONS
