@@ -26,20 +26,21 @@ def tables():
 
 
 @app.route('/save_data', methods=['POST'])
-@login_required
 def save_data():
     data = request.json
-    db.session.add(Data(
-        device_id=data.get('id'),
-        temperature=data.get('temperature') if is_positive(
-            data.get('temperature')) else None,
-        light=data.get('light') if is_positive(
-            data.get('light')) else None,
-        soil_humidity=data.get('soil_humidity') if is_positive(
-            data.get('soil_humidity')) else None,
-        air_humidity=data.get('air_humidity') if is_positive(
-            data.get('air_humidity')) else None,
-        ))
+    data['fields'].append(data['farm'])
+    for field in data['fields']:
+        db.session.add(Data(
+            device_id=field.get('id'),
+            temperature=field.get('temperature') if is_positive(
+                field.get('temperature')) else None,
+            light=field.get('light') if is_positive(
+                field.get('light')) else None,
+            soil_humidity=field.get('soil_humidity') if is_positive(
+                field.get('soil_humidity')) else None,
+            air_humidity=field.get('air_humidity') if is_positive(
+                field.get('air_humidity')) else None,
+            ))
     try:
         db.session.commit()
     except Exception as e:
